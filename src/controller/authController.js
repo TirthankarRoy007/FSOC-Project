@@ -8,9 +8,9 @@ const bcrypt = require('bcrypt')
 
 exports.userSignUp = async (req, res)=>{
     try{
-        const {name, email, company, password} = req.body
+        const {name, email, company, password, secretQuestion} = req.body
 
-        if (!name) {
+        if (!name || name === " ") {
             return res.status(400).send({ status: false, message: "Name is required" })
           }
         if (!isValidName(name)) {
@@ -35,24 +35,35 @@ exports.userSignUp = async (req, res)=>{
             return res.status(400).send({ status: false, message: "Company is required" })
           }
           if (!isValidString(company)) {
-            return res.status(400).send({ status: false, message: "Entered String is not Valid" })
+            return res.status(400).send({ status: false, message: "Company Name is not Valid" })
           }
         
         if (!password) {
             return res.status(400).send({ status: false, message: "Password is required" })
           }
         if (!isValidPassword(password)) {
-            return res.status(400).send({ status: false, message: "Password requirements didn't match" })
+            return res.status(400).send({ status: false, message: "Password rmust be of minimum 8 and maximum 15 characters including minimum one lower, one uppercase character, one special character and atleast one number" })
           }
+
+        if(!secretQuestion.question) {
+          return res.status(400).send({status: true, message: "Secret Question must be provided"})
+        }
+        if(!secretQuestion.answer) {
+          return res.status(400).send({status: true, message: "Answer must be provided"})
+        }
 
       //Hashing
         const saltRounds = 10;
         const hash = bcrypt.hashSync(password, saltRounds)
 
+        const saltRounds2 = 10;
+        const secretAnswerHash = bcrypt.hashSync(secretQuestion.answer, saltRounds2);
 
+
+        const {question} = secretQuestion
         const userData = {
           name: name, email: email,
-          password: hash, company: company
+          password: hash, company: company, secretQuestion: {question, answer: secretAnswerHash}
         }
         
         await UserModel.create(userData)
@@ -86,20 +97,61 @@ exports.loginUser = async (req, res)=> {
         return res.status(400).send({ status: false, message: "the length of password must be min:- 8 or max: 15" });
       }
   
-      let verifyUser = await UserModel.findOne({ email: email, password: password });
+      let verifyUser = await UserModel.findOne({ email: email});
       if (!verifyUser)
         return res.status(400).send({ status: false, message: "Invalid Login Credential" });   
-  
+      
+      let oldPass = verifyUser.password
+      let isMatch = await bcrypt.compare(password, oldPass)
+      if(!isMatch){
+        return res.status(400).send({ status: false, message: "Invalid Login Credential" });   
+      }
       const userToken = jwt.sign({ userId: verifyUser._id }, process.env.SECUKEY, { expiresIn: 30000 })
   
-      const userTokenData = jwt.decode(userToken)
-      userTokenData.iat = new Date(userTokenData.iat*1000).toGMTString()
-      userTokenData.exp = new Date(userTokenData.exp*1000).toGMTString()
-  
-      return res.status(200).send({status: true,message: 'Success',data: {userToken: userToken,...userTokenData
-          }
-      })
+      return res.status(200).cookie('token', userToken).send({status: true,message: 'Success',data: userToken})
     } catch (error) {
       res.status(500).send({ status: false, message: error.message });
     }
   };
+
+  exports.forgotPassword = async(req,res)=>{
+    try{
+      let data = req.body
+      if(!data.email) return res.status(400).send({status: false, message: "Email is Mandatory"})
+      let findUser = await UserModel.findOne({email: data.email})
+      if(!findUser) return res.status(400).send({status: false, message: "User Not found with Provided Email"})
+      data.secretQuestion = findUser.secretQuestion.question
+      return res.status(200).send({status: true, data: data})
+    } catch(err){
+        return res.status(500).send({status: false, err})
+    }
+  }
+
+  exports.resetPassword = async(req,res)=>{
+    let data = req.body
+
+    if(!data.email) return res.status(400).send({status: false, message: "Email is mandatory"})
+    if(!data.secretQuestion) return res.status(400).send({status: false, message: "Secret Question is Mandatory"})
+    if(!data.answer) return res.status(400).send({status: false, message: "Answer to secret question is mandatory"})
+
+    let findUser = await UserModel.findOne({email: data.email})
+    if(!findUser) return res.status(400).send({status: false, message: "User Not found with Provided Email"})
+
+    let answer = await bcrypt.compare(data.answer,findUser.secretQuestion.answer)
+    if(!answer) return res.status(400).send({status:false,Message:"Given Answer is wrong"})
+
+    if (data.secretQuestion !== findUser.secretQuestion.question) {
+      return res.status(400).send({ status: false, message: "Secret question is wrong" })
+    }
+
+    if(!data.newPassword) return res.status(400).send({status: false, message: "New Password is Mandatory"})
+
+    if(!isValidPassword(data.newPassword)) return res.status(400).send({status: false, message: "Password requirement didn't match"})   
+    
+    const saltRounds = 10;
+    const hash = bcrypt.hashSync(data.newPassword, saltRounds)
+    data.newPassword = hash
+
+    let updatedPass = await UserModel.findOneAndUpdate({email: data.email}, {password: data.newPassword})
+    return res.status(200).send({status: true, message: "Password Changed Successfully"})
+  }

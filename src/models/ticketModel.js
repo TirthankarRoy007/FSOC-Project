@@ -23,14 +23,13 @@ const ticketModel = new mongoose.Schema(
       author: {
         type: ObjectId,
         ref: 'User',
-        required: true
     },
       content: {
         type: String,
         required: true
     },
       createdAt: {
-        type: Date,
+        type: Date, 
         default: Date.now
     },
     }],

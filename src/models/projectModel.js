@@ -9,11 +9,20 @@ const projectModel = new mongoose.Schema(
     admin: {
         type: ObjectId,
         ref: 'User',
-        required: true
     },
     members: [{
-        type: ObjectId,
-        ref: 'User'
+        user: {
+            type: ObjectId,
+            ref: 'User'
+        },
+        isAdmin: {
+            type: Boolean,
+            default: false
+        },
+        isMember:  {
+            type: Boolean,
+            default: false
+       },
     }],
     tickets: [{
         type: ObjectId,
