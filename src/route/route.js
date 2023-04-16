@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {loginUser,userSignUp,forgotPassword, resetPassword} = require("../controller/authController")
+const {loginUser,userSignUp,forgotPassword, resetPassword, getUsers, myDetail,logoutUser} = require("../controller/authController")
 const {createProject, getAllProjects, getProjectById, updateProject, deleteProject, addMember, removeMember} = require('../controller/projectController')
 const auth = require('../middleware/middleware.js');
 const { createTicket, getTickets, getTicketById, updateTicket, deleteTicket, addComments } = require('../controller/ticketController');
@@ -12,11 +12,14 @@ router.post("/register", userSignUp)
 router.post("/login", loginUser)
 router.post("/forgot", forgotPassword)
 router.post("/reset", resetPassword)
+router.get('/users', getUsers)
+router.get('/me',auth.authentication, myDetail)
+router.post('/logout', logoutUser);
 
 
 //Project Controller
 router.post("/createProject", auth.authentication, createProject)
-router.get("/getProject", auth.authentication, getAllProjects)
+router.get("/getProject", getAllProjects)
 router.get("/getProject/:projectId", getProjectById)
 router.put("/updateProject/:projectId", auth.authentication, updateProject)
 router.delete("/deleteProject/:projectId", auth.authentication, deleteProject)

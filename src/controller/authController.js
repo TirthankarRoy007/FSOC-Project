@@ -46,10 +46,10 @@ exports.userSignUp = async (req, res)=>{
           }
 
         if(!secretQuestion.question) {
-          return res.status(400).send({status: true, message: "Secret Question must be provided"})
+          return res.status(400).send({status: false, message: "Secret Question must be provided"})
         }
         if(!secretQuestion.answer) {
-          return res.status(400).send({status: true, message: "Answer must be provided"})
+          return res.status(400).send({status: false, message: "Answer must be provided"})
         }
 
       //Hashing
@@ -107,8 +107,8 @@ exports.loginUser = async (req, res)=> {
         return res.status(400).send({ status: false, message: "Invalid Login Credential" });   
       }
       const userToken = jwt.sign({ userId: verifyUser._id }, process.env.SECUKEY, { expiresIn: 30000 })
-  
-      return res.status(200).cookie('token', userToken).send({status: true,message: 'Success',data: userToken})
+      
+     res.status(200).cookie('token', userToken).send({status: true,message: 'Success',data: userToken})
     } catch (error) {
       res.status(500).send({ status: false, message: error.message });
     }
@@ -121,7 +121,7 @@ exports.loginUser = async (req, res)=> {
       let findUser = await UserModel.findOne({email: data.email})
       if(!findUser) return res.status(400).send({status: false, message: "User Not found with Provided Email"})
       data.secretQuestion = findUser.secretQuestion.question
-      return res.status(200).send({status: true, data: data})
+      return res.status(200).send({status: true, data})
     } catch(err){
         return res.status(500).send({status: false, err})
     }
@@ -155,3 +155,34 @@ exports.loginUser = async (req, res)=> {
     let updatedPass = await UserModel.findOneAndUpdate({email: data.email}, {password: data.newPassword})
     return res.status(200).send({status: true, message: "Password Changed Successfully"})
   }
+
+  //Get Users
+  exports.getUsers = async (req, res) => {
+    try {
+      const users = await UserModel.find({})
+      res.status(200).send({ status: true, message: "Users fetched successfully", data: users })
+    } catch (err) {
+      res.status(500).send(err.message)
+    }
+  }
+  
+  exports.myDetail = async (req, res)=>{
+    try{
+      const users = await UserModel.findById(req.loginUserId)
+      res.status(200).send({status: true, users})
+    } catch (err){
+      res.status(500).send(err)
+    }
+  }
+
+  exports.logoutUser = async (req, res) => {
+    try {
+      // Clear the user's JWT token from the client-side cookie
+      res.clearCookie('token');
+  
+      res.status(200).send({ status: true, message: 'Logged out successfully' });
+    } catch (error) {
+      res.status(500).send({ status: false, message: error.message });
+    }
+  };
+  

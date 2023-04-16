@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 exports.authentication = async function (req, res, next) {
   try {
-    let token = req.headers["x-api-key"];
+    let { token } = req.cookies;
     if (!token) {
       return res.status(400).send({ status: false, message: "Token is missing" });
     }

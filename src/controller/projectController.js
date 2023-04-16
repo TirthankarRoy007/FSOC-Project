@@ -1,7 +1,7 @@
 const projectModel = require('../models/projectModel')
 const UserModel = require('../models/userModel')
 const mongoose = require('mongoose')
-
+const jwt = require('jsonwebtoken')
 // Create a new project
 exports.createProject = async (req, res) => {
   try {
@@ -28,14 +28,14 @@ exports.createProject = async (req, res) => {
 
     // save the project to the database
     const savedProject = await projectModel.create(project);
-    res
-      .status(201)
-      .send({ status: true, data: savedProject});
+    const userToken = jwt.sign({ userId: req.loginUserId }, process.env.SECUKEY, { expiresIn: 30000 });
+    res.cookie('token', userToken).status(201).send({ status: true, data: savedProject});
   } catch (err) {
     console.error(err);
     res.status(500).send(err);
   }
 };
+
 
 //Get all projects for the authenticated user
 exports.getAllProjects = async (req, res) => {
