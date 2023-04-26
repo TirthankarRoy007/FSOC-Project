@@ -43,11 +43,19 @@ exports.getAllProjects = async (req, res) => {
     const { userId } = req.params;
 
     const projects = await projectModel.find({
-      $or: [
-        { admin: { $eq: userId } },
-        { users: { $elemMatch: { $eq: userId } } }
+      $and: [
+        {
+          $or: [
+            { admin: { $eq: userId } },
+            { users: { $elemMatch: { $eq: userId } } }
+          ]
+        },
+        { isDeleted: false }
       ]
-    }).populate('name', 'email');
+    })
+    .populate('tickets')
+    .populate('name', 'email')
+    .exec();
 
     res.status(200).send(projects);
   } catch (err) {
@@ -56,16 +64,19 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
-
-
 // Get a project by ID
 exports.getProjectById = async (req, res) => {
   try {
     const { projectId } = req.params;
     const { loginUserId } = req;
     
-    const project = await projectModel.findOne({ _id: projectId, $or: [{ admin: loginUserId }, { users: loginUserId }] })
-      .populate('name', 'email');
+    const project = await projectModel.findOne({ 
+      _id: projectId, 
+      $and: [
+        { $or: [{ admin: loginUserId }, { users: loginUserId }] },
+        { isDeleted: false }
+      ]
+    }).populate('name', 'email');
     
     if (!project) {
       return res.status(404).send({ status: false, message: 'Project not found' });
@@ -77,7 +88,6 @@ exports.getProjectById = async (req, res) => {
     res.status(500).send({ status: false, message: 'Something went wrong' });
   }
 };
-
 
 // Update a project by ID
 exports.updateProject = async (req, res) => {
@@ -99,10 +109,9 @@ exports.updateProject = async (req, res) => {
     project.name = name;
     await project.save();
 
-    res.status(200).send({ status: true, data: project });
+    res.status(200).send({ status: true, message: "Project Updated Successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).send({ status: false, message: 'Something went wrong' });
+    res.status(500).send({ status: false, err: err.message });
   }
 };
 

@@ -106,9 +106,9 @@ exports.loginUser = async (req, res)=> {
       if(!isMatch){
         return res.status(400).send({ status: false, message: "Invalid Login Credential" });   
       }
-      const userToken = jwt.sign({ userId: verifyUser._id }, process.env.SECUKEY, { expiresIn: 30000 })
+      const token = jwt.sign({ userId: verifyUser._id }, process.env.SECUKEY, { expiresIn: 30000 })
       
-     res.status(200).cookie('token', userToken).send({status: true,message: 'Success',data: userToken})
+     res.status(200).send({status: true,message: 'Success',data: token})
     } catch (error) {
       res.status(500).send({ status: false, message: error.message });
     }

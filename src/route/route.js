@@ -31,7 +31,7 @@ router.post("/createTicket/:projectId", createTicket)
 router.get("/getTickets/:projectId", auth.authentication, getTickets)
 router.get("/getTicketsById/:ticketId/:projectId", auth.authentication, getTicketById)
 router.put("/updateTicket/:ticketId/:projectId", auth.authentication, updateTicket)
-router.delete('/deleteTicket/:projectId/tickets/:ticketId', auth.authentication, deleteTicket);
+router.delete('/deleteTicket/:projectId/:ticketId', auth.authentication, deleteTicket);
 router.post("/addComments/:ticketId/:projectId", auth.authentication, addComments)
 
 router.all("/*", (req, res) => {

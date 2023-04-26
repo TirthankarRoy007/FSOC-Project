@@ -26,13 +26,16 @@ const ticketModel = new mongoose.Schema(
     },
       content: {
         type: String,
-        required: true
     },
       createdAt: {
         type: Date, 
         default: Date.now
     },
     }],
+    isDeleted: {
+      type: Boolean,
+      default: false
+    },
   }, { timestamps: true });
 
   module.exports = mongoose.model('Ticket', ticketModel)

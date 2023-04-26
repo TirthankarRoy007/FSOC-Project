@@ -24,9 +24,6 @@ exports.createTicket = async (req, res) => {
     if (status && !['TODO', 'INPROGRESS', 'DONE'].includes(status)) {
       return res.status(400).send({ status: false, message: 'Invalid status' });
     }
-    if (!assignee || project.members.includes(assignee)) {
-      return res.status(400).send({ status: false, message: 'Assignee is not a member or admin of the project' });
-    }
 
     // Create new ticket
     const ticket = {
@@ -38,7 +35,6 @@ exports.createTicket = async (req, res) => {
       assignee: assignee || project.admin,
       comments: []
     };
-
     // Add comment if provided by a member or admin of the project
     const user = req.loginUserId;
     if (comments && (project.members.includes(user) || project.admin === user)) {
@@ -46,6 +42,10 @@ exports.createTicket = async (req, res) => {
     }
 
     const createTicket = await ticketModel.create(ticket);
+
+    // Add the ticket to the project's tickets array
+    project.tickets.push(createTicket._id);
+    await project.save();
 
     res.status(200).send({ message: 'Ticket created successfully', createTicket });
   } catch (error) {
@@ -72,8 +72,8 @@ exports.getTickets = async (req, res) => {
       return res.status(403).send({ message: 'You are not authorized to view tickets in this project' });
     }
 
-    // Get all tickets in the project
-    const tickets = await ticketModel.find({ project: projectId }).populate('assignee', 'name');
+    // Get all tickets in the project that are not deleted
+    const tickets = await ticketModel.find({ project: projectId, isDeleted: false }).populate('assignee', 'name');
 
     res.status(200).send({ tickets });
   } catch (error) {
@@ -87,7 +87,7 @@ exports.getTicketById = async (req, res) => {
   try {
     const ticketId = req.params.ticketId
     const { projectId } = req.params;
-    const ticket = await ticketModel.findById(ticketId).populate('assignee', 'comments.author');
+    const ticket = await ticketModel.findOne({ _id: ticketId, isDeleted: false }).populate('assignee', 'comments.author');
     if (!ticket) {
       return res.status(404).send({ message: 'Ticket not found' });
     }
@@ -170,7 +170,6 @@ exports.updateTicket = async (req, res) => {
   }
 };
 
-
 //Delete Tickets
 exports.deleteTicket = async (req, res) => {
   const { ticketId } = req.params;
@@ -187,14 +186,14 @@ exports.deleteTicket = async (req, res) => {
     }
 
     // Soft delete the ticket
-    ticket.deleted = true;
+    ticket.isDeleted = true;
     ticket.deletedAt = new Date();
     await ticket.save();
 
     res.send({ message: 'Ticket deleted successfully'});
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: 'Internal server error' });
+    res.status(500).send(error);
   }
 };
 //Add Comment
