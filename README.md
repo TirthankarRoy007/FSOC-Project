@@ -33,6 +33,7 @@ Users can update their profile info
 
 # Schema's For Project
 # Project Model
+```
 const projectModel = new mongoose.Schema(
     {
     name: {
@@ -68,7 +69,9 @@ const projectModel = new mongoose.Schema(
   }, { timestamps: true });
   
   module.exports = mongoose.model('Project', projectModel)
-  # Ticket Model
+  ```
+ # Ticket Model
+ ```
 const ticketModel = new mongoose.Schema(
     {
     title: {
@@ -105,8 +108,9 @@ const ticketModel = new mongoose.Schema(
   }, { timestamps: true });
 
   module.exports = mongoose.model('Ticket', ticketModel)
-
+```
   # User Model
+  ```
 const userModel = new mongoose.Schema(
     {
     name: { 
@@ -139,10 +143,12 @@ const userModel = new mongoose.Schema(
   }, { timestamps: true });
 
   module.exports = mongoose.model('User', userModel)
+  ```
 
   # API Endpoints 
   # 1> User Sign Up (localhost:3000/register)
   # Request Body
+  ```
   {
     "name": "Robert Downey Jr",
     "email": "rdj@gmail.com",
@@ -153,30 +159,39 @@ const userModel = new mongoose.Schema(
         "answer": "Inventing"
     }
 }
+```
 # Response Body
+```
 {
     "status": true,
     "message": "Sign-Up Successful "
 }
-
+```
 # 2> User Login (localhost:3000/login)
 # Request Body
+```
 {
     "email": "rdj@gmail.com",
     "password": "Ironman@1234"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "message": "Success",
     "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDMzZDYyNDBjMzU3MzFjOWI0OWVhOGMiLCJpYXQiOjE2ODExMTkwNDQsImV4cCI6MTY4MTE0OTA0NH0.yr4dtTRM71T6mYO84StySEwgUo6mDjIOAZnRmm9VeM0"
 }
+```
 # 3> Forget Password(localhost:3000/forgot)
 # Request Body
+```
 {
     "email": "rdj@gmail.com"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "data": {
@@ -184,25 +199,33 @@ const userModel = new mongoose.Schema(
         "secretQuestion": "What is your hobby?"
     }
 }
+```
 # 4> Reset Password (localhost:3000/reset)
 # Request Body
+```
 {
    "email": "rdj@gmail.com",
     "secretQuestion": "What is your hobby?",
     "answer": "Inventing",
     "newPassword": "newPass@123"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "message": "Password Changed Successfully"
 }
+```
 # 5> Create Project (localhost:3000/createProject)
 # Request Body
+```
 {
     "name": "Book Management Project"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "data": {
@@ -223,8 +246,10 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 }
+```
 # 6> Get Project (localhost:3000/getProject)
 # Response Body
+```
 [
     {
         "_id": "6433d91c0c35731c9b49ea94",
@@ -244,8 +269,10 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 ]
+```
 # 7> Get Project By Id (localhost:3000/getProject/:projectId)
 # Response Body
+```
 {
     "status": true,
     "data": {
@@ -266,12 +293,16 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 }
+```
 # 8> Update Project (localhost:3000/updateProject/:projectId)
 # Request Body
+```
 {
     "name": "MERN Stack Project"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "data": {
@@ -292,22 +323,30 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 }
+```
 # 9> Delete Project (localhost: 3000/deleteProject/:projectId)
 # Response Body
+```
 {
     Project Id in params
 }
+```
 # Response Body
+```
 {
     "status": true,
     "message": "Project Deleted Successfully"
 }
+```
 # 10> Add Member to Project(localhost:3000/addMembers/:projectId)
 # Request Body
+```
 {
     "memberId": "6433deaa640f057dc16d93d8"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "data": {
@@ -334,26 +373,33 @@ const userModel = new mongoose.Schema(
         "__v": 3
     }
 }
+```
 # 11> Remove Member from Project(localhost:3000/removeMembers/:projectId)
 # Request Body
+```
 {
     "memberId": "6433deaa640f057dc16d93d8"
 }
+```
 # Response Body
+```
 {
     "status": true,
     "message": "Member removed from project successfully"
 }
-
+```
 # 12> Create Ticket (localhost:3000/createTicket/:projectId)
 # Request Body
+```
 {
     "title": "MEAN project",
     "description": "Very Nice Project",
     "status": "TODO",
     "assignee": "6433deaa640f057dc16d93d8"
 }
+```
 # Response Body
+```
 {
     "message": "Ticket created successfully",
     "createTicket": {
@@ -368,10 +414,11 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 }
-
+```
 # 13> Get Ticket (localhost:3000/getTickets/:projectId)
 
 # Response Body
+```
 {
     "tickets": [
         {
@@ -390,9 +437,10 @@ const userModel = new mongoose.Schema(
         }
     ]
 }
-
+```
 # 14> Get Tickets By Id (localhost:3000/getTicketsById/:ticketId/:projectId)
 # Response Body
+```
 {
     "_id": "6433effa6b2f5aa3617dfce7",
     "title": "MEAN project",
@@ -406,16 +454,19 @@ const userModel = new mongoose.Schema(
     "updatedAt": "2023-04-10T11:16:10.334Z",
     "__v": 0
 }
-
+```
 # 15> Update Ticket(localhost:3000/updateTicket/:ticketId/:projectId)
 # Request Body
+```
 {
     "title": "back-end project",
     "description": " nice Project",
     "status": "INPROGRESS",
     "assignee": "6433deaa640f057dc16d93d8"
 }
+```
 # Response Body
+```
 {
     "message": "Ticket updated successfully",
     "ticket": {
@@ -430,20 +481,23 @@ const userModel = new mongoose.Schema(
         "__v": 0
     }
 }
-
+```
 # 16> Delete Ticket (localhost:3000/deleteTicket/:projectId/tickets/:ticketId)
 # Response Body
+```
 {
     "message": "Ticket deleted successfully"
 }
-
+```
 # 17> Add Comments (localhost:3000/addComments/:ticketId/:projectId)
-
 # Request Body
+```
 {
   "content": "Very Nice"
 }
+```
 # Response Body
+```
 {
     "_id": "6433f42e4770eaa0c7fc1681",
     "title": "MERN project",
@@ -462,3 +516,4 @@ const userModel = new mongoose.Schema(
     "updatedAt": "2023-04-10T11:35:03.690Z",
     "__v": 1
 }
+```
